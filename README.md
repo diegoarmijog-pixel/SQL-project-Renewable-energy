@@ -1,6 +1,6 @@
 # Renewable Energy Share SQL Project
 
-This repository contains a set of SQL scripts designed to analyze renewable energy adoption, electricity generation, and the pace of the energy transition across countries. The queries transform a larger source table named `renewable_energy_share` into cleaner, purpose-specific datasets for comparison, reporting, and exploratory analysis.
+This repository contains a set of SQL scripts designed to analyze renewable energy adoption, electricity generation, and the pace of the energy transition across countries. The project transforms a larger dataset, `renewable_energy_share`, into cleaner, purpose-specific tables for comparison, reporting, and exploratory analysis.
 
 ## Project objective
 
@@ -8,17 +8,35 @@ The main goal of this project is to support energy transition analysis by answer
 
 - Which countries have higher or lower renewable energy participation?
 - Is rising electricity demand driven more by population growth or by higher per-capita energy intensity?
-- How much electricity is generated from renewables, fossil fuels, and low-carbon sources?
+- How much electricity is generated from renewable, fossil, and low-carbon sources?
 - How quickly are countries reducing fossil dependence and increasing renewable shares?
 - Which countries are net energy importers or exporters?
 
-The scripts in this repository prepare structured datasets and extract key indicators for these analyses.
+The scripts in this repository prepare structured datasets and extract analytical indicators that can be used for benchmarking, trend analysis, and energy-system comparisons.
 
 ---
 
-## Source dataset assumption
+## Dataset source
 
-The project uses a database extracted from Kaggle (https://www.kaggle.com/datasets/elvisbui/renewable-energy-share-by-country-2000-2025), which contains 26 years of country-level electricity mix data covering renewable and non-renewable sources. The SQL scripts then create smaller, purpose-specific tables to make the analysis easier to manage and faster to query.
+The project uses a public dataset extracted from Kaggle: https://www.kaggle.com/datasets/elvisbui/renewable-energy-share-by-country-2000-2025
+
+This dataset contains country-level electricity mix information across multiple years, covering renewable and non-renewable energy sources. The SQL scripts in this repository create smaller, cleaner tables to make the analysis easier to manage and faster to query.
+
+---
+
+## Local setup and data loading
+
+Before running any SQL analysis, the source dataset must be loaded into a local PostgreSQL database. This project assumes that the raw table is named `renewable_energy_share` and that it is available in the database used for the analysis.
+
+### Recommended setup flow
+
+1. Install PostgreSQL locally.
+2. Create a database for the project, such as `renewable_energy_share`.
+3. Import the Kaggle dataset into PostgreSQL.
+4. Ensure the raw table name is exactly `renewable_energy_share`.
+5. Run the SQL scripts in the order described below to build the intermediate analytical tables.
+
+This repository is designed for a local PostgreSQL environment, and the queries depend on the source table being available in that database before the analysis begins.
 
 ---
 
@@ -26,9 +44,9 @@ The project uses a database extracted from Kaggle (https://www.kaggle.com/datase
 
 ### 1) country_general_info.sql
 
-This script creates a dedicated table named `country_general_info` for general country-level explanatory variables.
+This script creates a table named `country_general_info` for general country-level explanatory variables.
 
-It selects country-level records from `renewable_energy_share` and keeps fields such as:
+It keeps fields such as:
 
 - `country`
 - `year`
@@ -43,25 +61,25 @@ It selects country-level records from `renewable_energy_share` and keeps fields 
 - `renewables_energy_per_capita`
 - `fossil_energy_per_capita`
 
-This separates macroeconomic and demographic context from the raw source table and makes later analysis cleaner and more efficient.
+This separates macroeconomic and demographic context from the raw source table and makes downstream analysis cleaner and more efficient.
 
 ### 2) Demographic_energy_intensity.sql
 
-This script examines whether changes in energy demand are driven more by population growth or by increasing per-capita energy intensity.
+This script examines whether changes in energy demand are driven more by population growth or by rising per-capita energy intensity.
 
 It uses a CTE named `growthcalc` and calculates annual growth in:
 
 - `population`
 - `energy_per_capita`
 
-Using `LAG()`, the query compares each year with the previous year within each country and computes:
+Using `LAG()`, it compares each year to the previous year within each country and computes:
 
 - `population_growth_percentage`
 - `energy_pc_growth_percentage`
 
-The results are filtered for the period 2001-2024 and sorted by the highest energy-per-capita growth rate.
+The results are filtered to the 2001-2024 period and sorted by the highest energy-per-capita growth rate.
 
-This helps identify whether energy pressure is coming from more people, higher individual consumption, or both.
+This helps identify whether energy pressure is being driven by more people, higher consumption per person, or both.
 
 ### 3) electricity generation.sql
 
@@ -104,9 +122,9 @@ This table is central to transition analysis because it shows how much of each c
 
 ### 5) Energy_transition_velocity.sql
 
-This script evaluates how quickly countries are transitioning away from fossil-based electricity generation and toward renewable energy.
+This script evaluates how quickly countries are moving away from fossil-based electricity generation and toward renewable energy.
 
-It contains three analytical sections:
+It contains three sections:
 
 1. Fossil peak and drop-off
    - Identifies each country’s maximum historical fossil share in electricity generation
@@ -120,7 +138,7 @@ It contains three analytical sections:
    - Helps reveal the underlying long-term trend
 
 3. Top growing countries in decarbonization
-   - Compares renewable electricity share in 2005 vs 2025
+   - Compares renewable electricity share in 2005 and 2025
    - Measures `momentum_gained` as the change in renewable share
    - Sorts countries by the largest gains and displays the top 10
 
@@ -128,7 +146,7 @@ This script answers questions such as:
 
 - Which countries are reducing fossil dependence the fastest?
 - Are renewable shares increasing steadily over time?
-- Which countries show the strongest momentum in decarbonization?
+- Which countries show the strongest decarbonization momentum?
 
 ### 6) deficit_and_stability.sql
 
@@ -184,7 +202,7 @@ This highlights how quickly some countries have moved toward renewable electrici
 
 ### 2) Energy demand vs. population
 
-From `Demographic_energy_intensity.sql`, the top countries by growth in energy per capita between 2001 and 2024 show that changes in energy intensity are often more significant than population growth alone.
+From `Demographic_energy_intensity.sql`, the top countries by growth in energy per capita between 2001 and 2024 show that changes in energy intensity are often more important than population growth alone.
 
 | country | year | population | energy_per_capita [TWh] | population_growth_percentage [%] | energy_pc_growth_percentage [%] |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -224,7 +242,7 @@ Countries with the largest net electricity surpluses are:
 
 This highlights the contrast between countries that rely on imports to meet demand and those that export excess electricity generation.
 
-When it comes to stability, it is defined as the percentage of electricity generated from weather-dependent sources such as solar and wind. The classification criteria used in the analysis are as follows: if the stability share is above 60%, the grid is classified as `Unstable Grid`; if it is below 40%, it is classified as `Stable + requires transition`; and if it falls between the two thresholds, it is considered `Perfectly Balanced`.
+When it comes to stability, it is defined as the share of electricity generated from weather-dependent sources such as solar and wind. The classification criteria used in the analysis are as follows: if the share is above 60%, the grid is classified as `Unstable Grid`; if it is below 40%, the grid is classified as `Stable + requires transition`; and if it falls between the two thresholds, it is considered `Perfectly Balanced`.
 
 The countries with the most unstable grids are shown below.
 
@@ -233,7 +251,7 @@ The countries with the most unstable grids are shown below.
 | Denmark | 68.99 |
 | Lithuania | 65.088 |
 
-It is important to note that having an unstable grid does not necessarily imply power outages; this depends on the backup systems and other electricity sources available in each country.
+It is important to note that an unstable grid does not necessarily imply power outages; this depends on backup systems and other electricity sources available in each country.
 
 The countries with a perfectly balanced grid are shown below.
 
@@ -249,13 +267,13 @@ The countries with a perfectly balanced grid are shown below.
 | Spain | 42.888 |
 | Uruguay | 42.782 |
 
-The majority of the balanced grid countries are in European regions where weather conditions are highly variable, creating the need for a diverse energy mix to meet electricity demand and maintain a stable system.
+The majority of the balanced-grid countries are in European regions where weather conditions are highly variable, creating the need for a diverse energy mix to meet electricity demand and maintain a stable system.
 
 ---
 
 ## Summary
 
-This repository is focused on renewable energy transition analysis using SQL. It organizes country energy data into clean, purpose-specific tables and supports both descriptive and comparative analysis across demographic, generation, decarbonization, and energy-balance dimensions.
+This repository is focused on renewable energy transition analysis using SQL. It organizes country energy data into clean, purpose-specific tables and supports descriptive and comparative analysis across demographic, generation, decarbonization, and energy-balance dimensions.
 
 The scripts are especially useful for:
 
@@ -265,4 +283,5 @@ The scripts are especially useful for:
 - identifying energy demand drivers
 - evaluating renewable energy adoption over time
 - assessing electricity security and exporter/importer dynamics
+
 
