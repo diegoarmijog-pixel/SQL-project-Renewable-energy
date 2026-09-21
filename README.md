@@ -161,7 +161,7 @@ A common workflow for this project is:
 
 ---
 
-## Examples of results from the analysis
+## Results from the analysis
 
 ### 1) Energy transition velocity
 
