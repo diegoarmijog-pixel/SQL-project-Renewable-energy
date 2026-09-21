@@ -15,7 +15,7 @@ WITH growthcalc AS (
       AND energy_per_capita IS NOT NULL
 )
 SELECT 
-    country,
+    DISTINCT country,
     year,
     population,
     energy_per_capita,
@@ -24,4 +24,5 @@ SELECT
 FROM growthcalc
 WHERE year BETWEEN 2001 AND 2024
   AND energy_pc_growth_percentage IS NOT NULL
-ORDER BY energy_pc_growth_percentage DESC;
+ORDER BY energy_pc_growth_percentage DESC
+LIMIT 10;

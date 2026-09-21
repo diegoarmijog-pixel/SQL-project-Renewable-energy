@@ -45,9 +45,8 @@ SELECT
 FROM
     electricity_share;
 
-
+    
 /* for the top 10 growing countrys in decarbonization between 2000 and 2024 */
-
 With startyear AS (
     SELECT country, renewables_share_elec AS start_share
     FROM electricity_share
