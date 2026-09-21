@@ -1,6 +1,6 @@
 # Renewable Energy Share SQL Project
 
-This repository contains a set of SQL scripts designed to analyze renewable energy adoption, electricity generation, and the pace of energy transition across countries. The queries transform a larger source table named `renewable_energy_share` into cleaner, purpose-specific datasets for comparison, reporting, and exploratory analysis.
+This repository contains a set of SQL scripts designed to analyze renewable energy adoption, electricity generation, and the pace of the energy transition across countries. The queries transform a larger source table named `renewable_energy_share` into cleaner, purpose-specific datasets for comparison, reporting, and exploratory analysis.
 
 ## Project objective
 
@@ -18,7 +18,7 @@ The scripts in this repository prepare structured datasets and extract key indic
 
 ## Source dataset assumption
 
-The project uses a data base extracted from kaggle (https://www.kaggle.com/datasets/elvisbui/renewable-energy-share-by-country-2000-2025) which colects 26 years of contry-level electricity mix data between renewable and non renewable sources. The SQL scripts then create smaller, purpose-specific tables to make the analysis easier to manage and faster to query.
+The project uses a database extracted from Kaggle (https://www.kaggle.com/datasets/elvisbui/renewable-energy-share-by-country-2000-2025), which contains 26 years of country-level electricity mix data covering renewable and non-renewable sources. The SQL scripts then create smaller, purpose-specific tables to make the analysis easier to manage and faster to query.
 
 ---
 
@@ -132,7 +132,7 @@ This script answers questions such as:
 
 ### 6) deficit_and_stability.sql
 
-This script classifies countries by their electricity balance and highlights net energy importers and exporters.
+This script combines two complementary analyses: energy deficit classification and grid stability assessment.
 
 It calculates:
 
@@ -140,8 +140,11 @@ It calculates:
 - a classification as `Energy Importers / Deficit` or `Energy Exporters`
 - the total number of countries in each category
 - the top 5 net importers and top 5 net exporters
+- the share of electricity generated from weather-dependent sources such as solar and wind
+- a grid classification of `Unstable Grid`, `Perfectly Balanced`, or `Stable + requires transition`
+- the countries with the highest instability and the most balanced grids in the latest year available, typically 2024
 
-This allows the project to assess energy security and the degree to which a country depends on external supply or exports surplus generation.
+This allows the project to assess both energy security and the resilience of each country’s electricity system.
 
 ---
 
@@ -154,7 +157,7 @@ A common workflow for this project is:
 3. Use `electricity generation.sql` and `electricity share.sql` to separate generation and mix indicators.
 4. Use `Demographic_energy_intensity.sql` to understand the drivers of electricity demand.
 5. Use `Energy_transition_velocity.sql` to assess the pace of the energy transition.
-6. Use `deficit_and_stability.sql` to evaluate energy balance and external dependence.
+6. Use `deficit_and_stability.sql` to evaluate energy balance, external dependence, and grid stability.
 
 ---
 
@@ -220,6 +223,33 @@ Countries with the largest net electricity surpluses are:
 | Russia | 381.429 |
 
 This highlights the contrast between countries that rely on imports to meet demand and those that export excess electricity generation.
+
+When it comes to stability, it is defined as the percentage of electricity generated from weather-dependent sources such as solar and wind. The classification criteria used in the analysis are as follows: if the stability share is above 60%, the grid is classified as `Unstable Grid`; if it is below 40%, it is classified as `Stable + requires transition`; and if it falls between the two thresholds, it is considered `Perfectly Balanced`.
+
+The countries with the most unstable grids are shown below.
+
+| country | unstable_grid_share [%] |
+| :--- | :--- |
+| Denmark | 68.99 |
+| Lithuania | 65.088 |
+
+It is important to note that having an unstable grid does not necessarily imply power outages; this depends on the backup systems and other electricity sources available in each country.
+
+The countries with a perfectly balanced grid are shown below.
+
+| country | unstable_grid_share [%] |
+| :--- | :--- |
+| Cook Islands | 50 |
+| Germany | 43.495 |
+| Greece | 41.713 |
+| Ireland | 40.830 |
+| Luxembourg | 54.304 |
+| Netherlands | 45.206 |
+| Portugal | 45.335 |
+| Spain | 42.888 |
+| Uruguay | 42.782 |
+
+The majority of the balanced grid countries are in European regions where weather conditions are highly variable, creating the need for a diverse energy mix to meet electricity demand and maintain a stable system.
 
 ---
 
