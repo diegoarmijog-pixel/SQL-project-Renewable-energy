@@ -26,23 +26,37 @@ This dataset contains country-level electricity mix information across multiple 
 
 ## Local setup and data loading
 
-Before running any SQL analysis, the source dataset must be loaded into a local PostgreSQL database. This project assumes that the raw table is named `renewable_energy_share` and that it is available in the database used for the analysis.
+Before running the analysis queries, load the CSV into a local PostgreSQL database. The `load_renewable_energy_share.sql` script creates the raw table named `renewable_energy_share` and imports the CSV file from the project folder.
 
-### Recommended setup flow
+### Setup and import
 
 1. Install PostgreSQL locally.
-2. Create a database for the project, such as `renewable_energy_share`.
-3. Import the Kaggle dataset into PostgreSQL.
-4. Ensure the raw table name is exactly `renewable_energy_share`.
-5. Run the SQL scripts in the order described below to build the intermediate analytical tables.
+2. Install or locate the `psql` command-line client, then open a terminal in the project folder.
+3. Create the project database once:
 
-This repository is designed for a local PostgreSQL environment, and the queries depend on the source table being available in that database before the analysis begins.
+   ```sh
+   createdb renewable_energy_share
+   ```
+
+   Alternatively, connect to PostgreSQL and run `CREATE DATABASE renewable_energy_share;`.
+
+4. Run the loader from the project folder so its relative CSV path resolves correctly:
+
+   ```sh
+   psql -d postgres -f load_renewable_energy_share.sql
+   ```
+
+The loader connects to the `renewable_energy_share` database, creates the raw table if needed, and imports `renewable_energy_share_2000_2025.csv`. It uses `TRUNCATE` before importing, so a successful rerun replaces the table's existing rows with the CSV contents. Run the remaining analysis scripts after the import completes.
 
 ---
 
 ## Repository structure
 
-### 1) country_general_info.sql
+### 1) load_renewable_energy_share.sql
+
+This psql script loads `renewable_energy_share_2000_2025.csv` into the local PostgreSQL database. It creates the raw table `renewable_energy_share` if it does not already exist, imports all CSV columns, and reports the number of rows loaded. The database must be created separately before running this script.
+
+### 2) country_general_info.sql
 
 This script creates a table named `country_general_info` for general country-level explanatory variables.
 
@@ -63,7 +77,7 @@ It keeps fields such as:
 
 This separates macroeconomic and demographic context from the raw source table and makes downstream analysis cleaner and more efficient.
 
-### 2) Demographic_energy_intensity.sql
+### 3) Demographic_energy_intensity.sql
 
 This script examines whether changes in energy demand are driven more by population growth or by rising per-capita energy intensity.
 
@@ -81,7 +95,7 @@ The results are filtered to the 2001-2024 period and sorted by the highest energ
 
 This helps identify whether energy pressure is being driven by more people, higher consumption per person, or both.
 
-### 3) electricity generation.sql
+### 4) electricity generation.sql
 
 This script creates a table named `electricity_generation` focused on electricity generation by source and country.
 
@@ -102,7 +116,7 @@ It includes the following variables:
 
 This table is useful for analyzing the absolute scale of generation by technology and for comparing how different energy sources contribute to the grid over time.
 
-### 4) electricity share.sql
+### 5) electricity share.sql
 
 This script creates a table named `electricity_share` focused on the proportion of each electricity source in the energy mix.
 
@@ -120,7 +134,7 @@ It selects percentage-based indicators such as:
 
 This table is central to transition analysis because it shows how much of each country’s electricity comes from renewables, fossil fuels, and other low-carbon sources.
 
-### 5) Energy_transition_velocity.sql
+### 6) Energy_transition_velocity.sql
 
 This script evaluates how quickly countries are moving away from fossil-based electricity generation and toward renewable energy.
 
@@ -148,7 +162,7 @@ This script answers questions such as:
 - Are renewable shares increasing steadily over time?
 - Which countries show the strongest decarbonization momentum?
 
-### 6) deficit_and_stability.sql
+### 7) deficit_and_stability.sql
 
 This script combines two complementary analyses: energy deficit classification and grid stability assessment.
 
@@ -170,12 +184,13 @@ This allows the project to assess both energy security and the resilience of eac
 
 A common workflow for this project is:
 
-1. Start from the raw `renewable_energy_share` dataset.
-2. Use `country_general_info.sql` to prepare country-level context.
-3. Use `electricity generation.sql` and `electricity share.sql` to separate generation and mix indicators.
-4. Use `Demographic_energy_intensity.sql` to understand the drivers of electricity demand.
-5. Use `Energy_transition_velocity.sql` to assess the pace of the energy transition.
-6. Use `deficit_and_stability.sql` to evaluate energy balance, external dependence, and grid stability.
+1. Create the local `renewable_energy_share` database.
+2. Run `load_renewable_energy_share.sql` from the project folder to import the CSV.
+3. Use `country_general_info.sql` to prepare country-level context.
+4. Use `electricity generation.sql` and `electricity share.sql` to separate generation and mix indicators.
+5. Use `Demographic_energy_intensity.sql` to understand the drivers of electricity demand.
+6. Use `Energy_transition_velocity.sql` to assess the pace of the energy transition.
+7. Use `deficit_and_stability.sql` to evaluate energy balance, external dependence, and grid stability.
 
 ---
 
